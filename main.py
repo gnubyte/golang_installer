@@ -67,25 +67,27 @@ def add_go_paths():
         print(f"An error occurred: {e}")
 
 def install_go(go_version):
-    # Download Go
+    go_install_path = os.path.expanduser("~/go")  # Change installation path to home directory
+    go_bin_path = os.path.join(go_install_path, "bin")
     print(f"Downloading Go version {go_version}...")
     download_url = f"https://golang.org/dl/go{go_version}.linux-amd64.tar.gz"
     run_command(f"wget {download_url} -O go.tar.gz")
 
-    # Extract Go and setup paths
     print("Extracting Go...")
-    run_command("rm -rf /usr/local/go && tar -C /usr/local -xzf go.tar.gz")
+    run_command(f"rm -rf {go_install_path} && mkdir -p {go_install_path}")
+    run_command(f"tar -C {go_install_path} -xzf go.tar.gz --strip-components=1")
     run_command("rm go.tar.gz")  # Clean up the tarball
 
-    # Set up Go environment variables
-    # You might want to add these to your profile or shell rc file for persistence
-    os.environ["PATH"] += os.pathsep + "/usr/local/go/bin"
-    os.environ["GOPATH"] = os.environ["HOME"] + "/go"
-    os.environ["GOBIN"] = os.environ["GOPATH"] + "/bin"
+    # Update environment variables to use the new installation path
+    os.environ["PATH"] += os.pathsep + go_bin_path
+    os.environ["GOPATH"] = os.path.join(os.path.expanduser("~"), "go_projects")  # Separate GOPATH for projects
+    os.environ["GOBIN"] = os.path.join(os.environ["GOPATH"], "bin")
 
-    print("Attempting to add golang to bash automatically")
+    print("Attempting to add Go to bash automatically")
+    add_go_paths()
     print("Go installation is complete.")
     print("Remember to add Go paths to your profile or shell rc file for persistence.")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Go (Golang) Installer Script")
